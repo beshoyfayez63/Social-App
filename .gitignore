@@ -12,8 +12,9 @@
 /build
 
 /src/utils/libs/axios.js
-.firebaserc
+/.firebaserc
 /firebase.json
+.firebase
 
 # misc
 .DS_Store
