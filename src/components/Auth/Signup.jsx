@@ -25,7 +25,6 @@ function Signup() {
     mode: 'all',
     resolver: yupResolver(signupSchema),
   });
-  console.log(errors);
 
   const history = useHistory();
   const dispatch = useDispatch();
@@ -33,7 +32,6 @@ function Signup() {
 
   const loginHandler = async (data) => {
     const { email, handle, password, confirmation } = data;
-    console.log(data);
     setIsLoading(true);
     try {
       const result = await dispatch(

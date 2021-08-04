@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/user/userSlice';
@@ -18,7 +18,6 @@ import KeyboardReturn from '@material-ui/icons/KeyboardReturn';
 import useStyles from './profile-styles';
 
 function AuthProfile(props) {
-  console.log('AuthProfile');
   const dispatch = useDispatch();
   const credentials = useSelector((state) => state.user.credentials);
 
@@ -44,7 +43,7 @@ function AuthProfile(props) {
           {credentials.handle && (
             <MuiLink
               component={Link}
-              to={`/users/${credentials.handle}`}
+              to={`/user/${credentials.handle}`}
               color='primary'
               variant='h5'
             >
@@ -76,13 +75,11 @@ function AuthProfile(props) {
           <span>Joined {dayjs(credentials.createdAt).format('MM YYYY')}</span>
         </div>
         <div className={classes.settings}>
-          {(credentials.bio || credentials.website || credentials.location) && (
-            <EditProfileDetails
-              bio={credentials.bio}
-              location={credentials.location}
-              website={credentials.website}
-            />
-          )}
+          <EditProfileDetails
+            bio={credentials.bio}
+            location={credentials.location}
+            website={credentials.website}
+          />
           <TooltipIconButton
             title='Logout'
             placement='bottom'
@@ -96,4 +93,4 @@ function AuthProfile(props) {
   );
 }
 
-export default AuthProfile;
+export default memo(AuthProfile);

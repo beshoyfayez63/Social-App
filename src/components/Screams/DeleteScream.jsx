@@ -1,5 +1,4 @@
 import { Fragment, useState, memo } from 'react';
-import useDialog from '../../hooks/useDialog';
 import { useDispatch } from 'react-redux';
 import { deleteScream } from '../../store/screams/screamThunk';
 import TooltipIconButton from '../../shared/components/UI/TooltipIconButton';
@@ -13,14 +12,28 @@ import Button from '@material-ui/core/Button';
 import useStyles from './screams-style';
 
 function DeleteScream(props) {
-  console.log('DeleteScream');
-  const { open, openDialogHandler, closeDialogHandler } = useDialog();
+  // const { open, openDialogHandler, closeDialogHandler } = useDialog();
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const { screamId } = props;
 
+  const openDialogHandler = () => {
+    setOpen(true);
+  };
+
+  const closeDialogHandler = (_, reason) => {
+    if (loading && reason) {
+      return;
+    }
+    setOpen(false);
+  };
+
   const deleteScreamHandler = async () => {
     setLoading(true);
+    if (loading) {
+      setOpen(true);
+    }
     await dispatch(deleteScream(screamId));
   };
 
@@ -28,16 +41,28 @@ function DeleteScream(props) {
 
   return (
     <Fragment>
-      <TooltipIconButton title='Delete Scream' onClick={openDialogHandler}>
+      <TooltipIconButton
+        title='Delete Scream'
+        onClick={openDialogHandler}
+        className={classes.deleteIcon}
+      >
         <DeleteOutline color='secondary' />
       </TooltipIconButton>
       <Dialog fullWidth open={open} onClose={closeDialogHandler} maxWidth='sm'>
         <DialogTitle>Are you sure you to delete this scream</DialogTitle>
         <DialogActions>
-          <Button onClick={closeDialogHandler} color='primary'>
+          <Button
+            onClick={closeDialogHandler}
+            color='primary'
+            disabled={loading}
+          >
             Cancel
           </Button>
-          <Button onClick={deleteScreamHandler} color='primary'>
+          <Button
+            onClick={deleteScreamHandler}
+            color='primary'
+            disabled={loading}
+          >
             {loading ? '...' : 'Delete'}
           </Button>
         </DialogActions>

@@ -1,30 +1,44 @@
 import { useState, Fragment } from 'react';
 import { useForm } from 'react-hook-form';
-import useDialog from '../../hooks/useDialog';
+// import useDialog from '../../hooks/useDialog';
 import { useDispatch } from 'react-redux';
+import { createScream } from '../../store/screams/screamThunk';
 import TooltipIconButton from '../../shared/components/UI/TooltipIconButton';
-import Dialog from '@material-ui/core/Dialog';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Modal from '../../shared/components/UI/Modal';
 import AddIcon from '@material-ui/icons/Add';
 import Input from '../../shared/components/UI/Input';
-import Button from '@material-ui/core/Button';
 
 import useStyles from './screams-style';
 
 function CreateScream() {
-  console.log('CreateScream');
-  const [isLoading, setIsLoading] = useState(false);
-
+  const [open, setOpen] = useState(false);
   const {
     control,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isValid = false, isSubmitting },
   } = useForm({ mode: 'all' });
-  const { open, openDialogHandler, closeDialogHandler } = useDialog();
+
+  const openDialogHandler = () => {
+    setOpen(true);
+  };
+  const closeDialogHandler = (_, reason) => {
+    if (reason && isSubmitting) {
+      return;
+    }
+    setOpen(false);
+  };
+
+  // const { open, openDialogHandler, closeDialogHandler } = useDialog();
   const dispatch = useDispatch();
 
-  const createScreamHandler = (data) => {};
+  const createScreamHandler = async (data) => {
+    // setIsLoading(true);
+    await dispatch(createScream(data));
+    reset({ body: '' });
+    closeDialogHandler();
+  };
 
   const classes = useStyles();
   return (
@@ -38,12 +52,15 @@ function CreateScream() {
       </TooltipIconButton>
       <Modal
         open={open}
-        onCloseDialog={() => closeDialogHandler(() => reset({ body: '' }))}
+        onCloseDialog={closeDialogHandler}
         maxWidth='sm'
         closeIcon={true}
         dialogInfo='Post a new scream'
-        submitButtonName='Create Scream'
+        submitButtonName={
+          !isSubmitting ? 'Create Scream' : <CircularProgress size={20} />
+        }
         onSubmit={handleSubmit(createScreamHandler)}
+        disabled={!isValid || isSubmitting}
       >
         <form>
           <Input

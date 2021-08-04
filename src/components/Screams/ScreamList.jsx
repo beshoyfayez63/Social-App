@@ -1,28 +1,17 @@
-import { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { selectScreamByIds } from '../../store/screams/screamSlice';
-import { fetchScreams } from '../../store/screams/screamThunk';
-
+import { memo } from 'react';
+// import { useSelector } from 'react-redux';
 import ScreamItem from './ScreamItem';
+import ScreamSkeleton from '../../shared/components/UI/ScreamSkeleton';
 
-function ScreamList() {
-  console.log('ScreamList');
-  const dispatch = useDispatch();
-
-  const screamIds = useSelector(selectScreamByIds);
-  const screamsStatus = useSelector((state) => state.screams.status);
-
-  useEffect(() => {
-    if (screamsStatus === 'idle') {
-      dispatch(fetchScreams());
-    }
-  }, [dispatch, screamsStatus]);
-
+function ScreamList({ screamIds, screamsStatus, selectScreamById }) {
   let content;
   if (screamsStatus === 'loading') {
-    content = <p>Loading...</p>;
+    content = <ScreamSkeleton />;
   }
-  if (screamsStatus === 'succeeded') {
+  if (screamsStatus === 'succeeded' && screamIds.length === 0) {
+    content = <p>No Screams Found</p>;
+  }
+  if (screamsStatus === 'succeeded' && screamIds.length > 0) {
     content = screamIds.map((screamId) => {
       return <ScreamItem key={screamId} screamId={screamId} />;
     });
@@ -31,4 +20,4 @@ function ScreamList() {
   return <div>{content}</div>;
 }
 
-export default ScreamList;
+export default memo(ScreamList);

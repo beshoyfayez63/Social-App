@@ -2,6 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { logout } from './userSlice';
 import axios from '../../utils/libs/axios';
 import { calculateRemainingTime } from '../../utils/helper';
+import { getUserScreams } from '../screams/screamSlice';
 
 export let logoutTimer;
 
@@ -23,6 +24,7 @@ export const loginUser = createAsyncThunk(
   async (userData, { dispatch, rejectWithValue }) => {
     try {
       const response = await axios.post('/api/login', userData);
+
       dispatch(manageAuthState(response.data.token));
       return response.data.token;
     } catch (err) {
@@ -89,6 +91,34 @@ export const updateUserDetails = createAsyncThunk(
       return dispatch(getUserData());
     } catch (err) {
       rejectWithValue(err.response.data);
+    }
+  }
+);
+
+export const getUserByHandle = createAsyncThunk(
+  'user/getuserbyhandle',
+  async (userHandle, { dispatch }) => {
+    try {
+      const response = await axios.get(`/api/user/${userHandle}`);
+      dispatch(getUserScreams(response.data.screams));
+      return response.data;
+    } catch (err) {}
+  }
+);
+
+export const markNotificationsAsRead = createAsyncThunk(
+  'user/marknotificationsread',
+  async (notificationsIds, { dispatch, rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post('/api/notifications', notificationsIds, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return notificationsIds;
+    } catch (error) {
+      rejectWithValue(error.response.data);
     }
   }
 );

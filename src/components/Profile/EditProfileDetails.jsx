@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useState, memo } from 'react';
 import { useDispatch } from 'react-redux';
 import { updateUserDetails } from '../../store/user/userThunk';
 import { useForm } from 'react-hook-form';
@@ -12,7 +12,6 @@ import useStyles from './profile-styles';
 import useDialog from '../../hooks/useDialog';
 
 function EditProfileDetails(props) {
-  console.log('EditProfileDetails');
   const { open, openDialogHandler, closeDialogHandler } = useDialog();
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
@@ -25,7 +24,6 @@ function EditProfileDetails(props) {
   } = useForm({ mode: 'all', resolver: yupResolver(updateUserProfileSchema) });
 
   const updateUserProfileHandler = async (data) => {
-    console.log('data', data);
     try {
       setIsLoading(true);
       await dispatch(updateUserDetails(data));
@@ -95,4 +93,4 @@ function EditProfileDetails(props) {
   );
 }
 
-export default EditProfileDetails;
+export default memo(EditProfileDetails);

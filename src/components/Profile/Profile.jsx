@@ -1,4 +1,6 @@
+import { memo } from 'react';
 import { useSelector } from 'react-redux';
+import ProfileSkeleton from '../../shared/components/UI/ProfileSkeleton';
 import { token } from '../../store/user/userSlice';
 import AuthProfile from './AuthProfile';
 import GuestProfile from './GuestProfile';
@@ -6,14 +8,13 @@ import GuestProfile from './GuestProfile';
 // import useStyles from './profile-styles';
 
 function Profile() {
-  console.log('Profile');
   const tokenState = useSelector(token);
   const loading = useSelector((state) => state.user.status);
-  // console.log(loading);
+
   let profileMarkup;
 
   if (loading === 'pending') {
-    profileMarkup = <p>Loading...</p>;
+    profileMarkup = <ProfileSkeleton />;
   }
 
   if (loading === 'success' && tokenState) {

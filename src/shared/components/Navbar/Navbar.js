@@ -7,10 +7,8 @@ import CreateScream from '../../../components/Screams/CreateScream';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Button from '@material-ui/core/Button';
-import TooltipIconButton from '../UI/TooltipIconButton';
 import HomeIcon from '@material-ui/icons/Home';
-import NotificationsIcon from '@material-ui/icons/Notifications';
-
+import Notifications from '../../../components/Notifications/NotificationList';
 import useTheme from './Navbar-styles';
 
 // CSS
@@ -27,7 +25,7 @@ function Navbar() {
           <Button
             color='inherit'
             component={NavLink}
-            to='/'
+            to='/screams'
             activeClassName={classes.active}
             exact
           >
@@ -36,14 +34,8 @@ function Navbar() {
 
           {tokenSelector && (
             <Fragment>
-              {/* <TooltipIconButton title='Add Scream' placement='bottom'>
-                <AddIcon className={classes.svg} />
-              </TooltipIconButton> */}
               <CreateScream />
-
-              <TooltipIconButton title='notifications' placement='bottom'>
-                <NotificationsIcon className={classes.svg} />
-              </TooltipIconButton>
+              <Notifications />
             </Fragment>
           )}
           {!tokenSelector && (

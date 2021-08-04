@@ -12,10 +12,7 @@ function Input({ control, name, rules, defaultValue, ...props }) {
   //   control,
   //   defaultValue: '',
   // });
-  // console.log( inputProps);
-  // console.log(invalid, isTouched, isDirty);
-  // console.log(touchedFields, dirtyFields);
-  // console.log(error);
+
   // return (
   //   <TextField
   //     {...inputProps}

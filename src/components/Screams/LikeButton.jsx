@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { token, memomizeEntities } from '../../store/user/userSlice';
@@ -8,45 +8,56 @@ import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 
 function LikeButton({ screamId }) {
-  console.log('LikeButton');
   const dispatch = useDispatch();
   const tokenSelector = useSelector(token);
-  // const selectLikes = useSelector((state) => selectLikeEntities(state));
-  // console.log(selectLikes);
-  // const isLikedScream = selectLikes[screamId] ? true : false;
+  const [loading, setLoading] = useState(false);
 
   const isLikedScream = useSelector((state) =>
     memomizeEntities(state, screamId)
   )
     ? true
     : false;
-  const likeScreamHandler = useCallback(() => {
-    dispatch(likeScream(screamId));
+
+  const likeScreamHandler = useCallback(async () => {
+    setLoading(true);
+    await dispatch(likeScream(screamId));
+    setLoading(false);
   }, [dispatch, screamId]);
-  const unLikeScreamHandler = useCallback(() => {
-    dispatch(unLikeScream(screamId));
+
+  const unLikeScreamHandler = useCallback(async () => {
+    setLoading(true);
+    await dispatch(unLikeScream(screamId));
+    setLoading(false);
   }, [dispatch, screamId]);
 
   let likedButton;
   if (!tokenSelector) {
     likedButton = (
-      <TooltipIconButton title='Login to like'>
-        <Link to='/login'>
+      <Link to='/login'>
+        <TooltipIconButton title='Login to like'>
           <FavoriteBorderIcon color='primary' />
-        </Link>
-      </TooltipIconButton>
+        </TooltipIconButton>
+      </Link>
     );
   }
   if (tokenSelector && isLikedScream) {
     likedButton = (
-      <TooltipIconButton title='UnLike' onClick={unLikeScreamHandler}>
+      <TooltipIconButton
+        title='UnLike'
+        onClick={unLikeScreamHandler}
+        disabled={loading}
+      >
         <FavoriteIcon color='primary' />
       </TooltipIconButton>
     );
   }
   if (tokenSelector && !isLikedScream) {
     likedButton = (
-      <TooltipIconButton title='Like' onClick={likeScreamHandler}>
+      <TooltipIconButton
+        title='Like'
+        onClick={likeScreamHandler}
+        disabled={loading}
+      >
         <FavoriteBorderIcon color='primary' />
       </TooltipIconButton>
     );

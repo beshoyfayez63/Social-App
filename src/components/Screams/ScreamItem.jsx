@@ -1,7 +1,9 @@
-import { memo } from 'react';
-import { Link } from 'react-router-dom';
+import { memo, Fragment, useEffect, useState, lazy, Suspense } from 'react';
+import { Link, Route, useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectScreamById } from '../../store/screams/screamSlice';
+import { memomizeScreamById } from '../../store/screams/screamSlice';
+import { memomizeCredentials } from '../../store/user/userSlice';
+
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import LikeButton from './LikeButton';
@@ -14,17 +16,31 @@ import Typography from '@material-ui/core/Typography';
 import TooltipIconButton from '../../shared/components/UI/TooltipIconButton';
 // Icons
 import ChatIcon from '@material-ui/icons/Chat';
+import UnfoldMoreIcon from '@material-ui/icons/UnfoldMore';
 // CSS
 import useStyles from './screams-style';
 
-function ScreamItem({ screamId }) {
-  console.log('Scream Item');
-  dayjs.extend(relativeTime);
+const ScreamDialog = lazy(() => import('./ScreamDialog'));
 
+function ScreamItem({ screamId }) {
+  dayjs.extend(relativeTime);
   const tokenState = useSelector((state) => state.user.token);
-  const credentials = useSelector((state) => state.user.credentials);
-  const scream = useSelector((state) => selectScreamById(state, screamId));
-  const { body, createdAt, userImage, userHandle, likeCount } = scream;
+  const handle = useSelector((state) => memomizeCredentials(state));
+  const scream = useSelector((state) => memomizeScreamById(state, screamId));
+  const { body, createdAt, userImage, userHandle, likeCount, commentCount } =
+    scream;
+
+  const [match, setMatch] = useState(window.location.pathname);
+
+  const history = useHistory();
+
+  useEffect(() => {
+    if (window.location.pathname === '/screams') {
+      setMatch('/screams');
+    } else if (window.location.pathname === `/user/${userHandle}`) {
+      setMatch(`/user/${userHandle}`);
+    }
+  }, [userHandle, screamId, history]);
 
   const classes = useStyles();
   return (
@@ -43,25 +59,52 @@ function ScreamItem({ screamId }) {
         >
           {userHandle}
         </Typography>
-        <div className={classes.settings}>
-          {tokenState && credentials.handle === userHandle && (
+        {tokenState && handle === userHandle && (
+          <div className={classes.settings}>
             <DeleteScream screamId={screamId} userHandler={userHandle} />
-          )}
-        </div>
+          </div>
+        )}
         <Typography variant='body2' color='textSecondary'>
           {dayjs(createdAt).fromNow()}
         </Typography>
         <Typography variant='body1'>{body}</Typography>
-        <LikeButton screamId={screamId} />
+        {screamId ? <LikeButton screamId={screamId} /> : null}
         <span>{likeCount} likes</span>
 
         <TooltipIconButton title='Comments' placement='top'>
-          <ChatIcon />
+          <ChatIcon color='primary' />
         </TooltipIconButton>
-        {/* <span>{commentCount} comments</span> */}
+        <span>{commentCount} comments</span>
+        <Fragment>
+          <Link to={`${match}/${screamId}`}>
+            {/* <Link to={`/screams/${screamId}`}> */}
+            <TooltipIconButton
+              title='Expand Scream'
+              className={classes.expandButton}
+            >
+              <UnfoldMoreIcon color='primary' />
+            </TooltipIconButton>
+          </Link>
+          <Suspense>
+            <Route
+              path={[`/screams/${screamId}`, `/user/${userHandle}/${screamId}`]}
+              render={() => {
+                return (
+                  <ScreamDialog
+                    likeCount={likeCount}
+                    screamId={screamId}
+                    userHandle={userHandle}
+                  />
+                );
+              }}
+            />
+          </Suspense>
+        </Fragment>
       </CardContent>
     </Card>
   );
 }
 
-export default memo(ScreamItem);
+export default memo(ScreamItem, (prev, next) => {
+  return prev.screamId === next.screamId;
+});

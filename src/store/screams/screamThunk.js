@@ -1,16 +1,15 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../utils/libs/axios';
-import { getClient } from '../../utils/apis';
+import { getClient, postClient, deleteClient } from '../../utils/apis';
 import {
   likeScream as userLikeScream,
   unLikeScream as userUnlikeScream,
 } from '../user/userSlice';
+// import {} from './screamSlice';
 
 export const fetchScreams = createAsyncThunk(
   'screams/fetchScreams',
   async () => {
-    // const screams = await axios.get('/api/screams');
-    // return screams.data;
     return await getClient('/api/screams');
   }
 );
@@ -28,7 +27,6 @@ export const likeScream = createAsyncThunk(
       dispatch(userLikeScream(response.data.screamId));
       return response.data;
     } catch (error) {
-      console.log(error);
       rejectWithValue(error.response.data);
     }
   }
@@ -56,14 +54,9 @@ export const deleteScream = createAsyncThunk(
   async (id, { dispatch, rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.delete(`/api/scream/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return { data: response.data, id };
+      const response = await deleteClient(`/api/scream/${id}`, token);
+      return { data: response, id };
     } catch (err) {
-      console.log(err.response);
       rejectWithValue(err.response.data);
     }
   }
@@ -73,11 +66,9 @@ export const createScream = createAsyncThunk(
   'scream/createscream',
   async (data, { dispatch, rejectWithValue }) => {
     try {
-      const response = await axios.post('/api/scream', data);
-      console.log(response);
-      return response.data;
+      const token = localStorage.getItem('token');
+      return await postClient('/api/scream', data, token);
     } catch (error) {
-      console.log(error);
       rejectWithValue(error.response.data);
     }
   }

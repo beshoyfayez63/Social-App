@@ -20,10 +20,34 @@ const styles = makeStyles((theme) => ({
     top: 11,
     right: 0,
   },
+  deleteIcon: {
+    marginRight: 25,
+  },
   createScream: {
     '& svg': {
       fill: 'white',
     },
+  },
+  expandButton: {
+    float: 'right',
+  },
+  dialog: {
+    position: 'relative',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+  },
+  screamDialog: {
+    position: 'relative',
+  },
+
+  profileImage: {
+    maxWidth: 200,
+    height: 200,
+    borderRadius: '50%',
+    objectFit: 'cover',
   },
 }));
 

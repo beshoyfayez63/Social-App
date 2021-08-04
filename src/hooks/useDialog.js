@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 const useDialog = () => {
   const [open, setOpen] = useState(false);
@@ -6,10 +6,10 @@ const useDialog = () => {
   const openDialogHandler = () => {
     setOpen(true);
   };
-  const closeDialogHandler = (reset) => {
+  const closeDialogHandler = useCallback((reset) => {
     setOpen(false);
-    reset();
-  };
+    if (reset) reset();
+  }, []);
 
   return {
     open,

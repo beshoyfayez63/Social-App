@@ -4,13 +4,24 @@ import {
   createSelector,
 } from '@reduxjs/toolkit';
 
-import { signupUser, loginUser, getUserData, logoutTimer } from './userThunk';
+import {
+  signupUser,
+  loginUser,
+  getUserData,
+  logoutTimer,
+  getUserByHandle,
+  markNotificationsAsRead,
+} from './userThunk';
 
 const likesAdapter = createEntityAdapter({
   selectId: (like) => like.screamId,
 });
 const notificationsAdapter = createEntityAdapter({
   selectId: (notification) => notification.notificationId,
+});
+
+const userScreamsAdapter = createEntityAdapter({
+  selectId: (scream) => scream.screamId,
 });
 
 // const userAdapter = createEntityAdapter({});
@@ -23,6 +34,7 @@ const userSlice = createSlice({
     credentials: {},
     likes: likesAdapter.getInitialState({}),
     notifications: notificationsAdapter.getInitialState({}),
+    userHandleProfile: {},
     token: localStorage.getItem('token') || null,
   },
   reducers: {
@@ -49,22 +61,17 @@ const userSlice = createSlice({
       state.token = action.payload;
     },
     [loginUser.rejected]: (state, action) => {
-      console.log(action.payload);
       state.status = 'failed';
       state.error = action.payload.general;
     },
     [signupUser.fulfilled]: (state, action) => {
-      console.log(action.payload);
       state.token = action.payload;
     },
     [signupUser.rejected]: (state, action) => {
-      console.log(action.payload);
       state.status = 'failed';
       if (action.payload.email) {
-        console.log('EMail');
         state.error = action.payload.email;
       } else if (action.payload.handle) {
-        console.log('handle');
         state.error = action.payload.handle;
       } else if (action.payload.general) {
         state.error = action.payload.general;
@@ -76,7 +83,6 @@ const userSlice = createSlice({
       state.status = 'pending';
     },
     [getUserData.fulfilled]: (state, action) => {
-      console.log(action.payload);
       state.status = 'success';
       state.credentials = action.payload.credentials;
       notificationsAdapter.upsertMany(
@@ -87,6 +93,19 @@ const userSlice = createSlice({
     },
     [getUserData.rejected]: (state, action) => {
       state.status = 'rejected';
+    },
+    [getUserByHandle.fulfilled]: (state, action) => {
+      state.userHandleProfile = action.payload.user;
+    },
+    [markNotificationsAsRead.fulfilled]: (state, action) => {
+      notificationsAdapter.updateMany(state.notifications, [
+        action.payload.map((notId) => {
+          if (state.notifications.entities[notId].read) {
+            return state.notifications.entities[notId].read;
+          }
+          return (state.notifications.entities[notId].read = true);
+        }),
+      ]);
     },
   },
 });
@@ -102,8 +121,29 @@ export const {
   selectById: selectLikeId,
   selectEntities: selectLikeEntities,
 } = likesAdapter.getSelectors((state) => state.user.likes);
+export const {
+  selectAll: selectAllNotifications,
+  selectIds: selectNotificationIds,
+  selectById: selectNotificationId,
+  selectEntities: selectNotificationEntities,
+} = likesAdapter.getSelectors((state) => state.user.notifications);
+
+export const readNotifications = (state) =>
+  selectAllNotifications(state).filter((n) => n.read === true).length;
+export const notReadNotifications = (state) =>
+  selectAllNotifications(state).filter((n) => n.read === false).length;
+
+export const {
+  selectIds: selectUserScreamByIds,
+  selectById: selectUserScreamById,
+} = userScreamsAdapter.getSelectors((state) => state.user.userScreams);
 
 export const memomizeEntities = createSelector(
   [selectLikeEntities, (state, screamId) => screamId],
   (likes, screamId) => likes[screamId]
+);
+
+export const memomizeCredentials = createSelector(
+  [(state) => state.user.credentials],
+  (credentials) => credentials.handle
 );
