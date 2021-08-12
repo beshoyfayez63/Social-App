@@ -12,7 +12,6 @@ node_modules/
 /build
 
 # enviroment
-src/utils/libs/**
 /.firebaserc
 /firebase.json
 .firebase
